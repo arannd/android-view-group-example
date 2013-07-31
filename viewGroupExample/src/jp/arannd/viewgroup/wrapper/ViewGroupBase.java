@@ -2,6 +2,7 @@ package jp.arannd.viewgroup.wrapper;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -137,6 +138,14 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	}
 
 	/**
+	 * Activityからの結果を処理します。
+	 */
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+	}
+
+	/**
 	 * 戻るの処理
 	 * 
 	 * @return 現在のViewに戻る要素があれば True を返し 戻る要素がなければ False を返します。
@@ -158,13 +167,13 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	 */
 	protected void setCurrentMode(int mode) {
 		this.currentMode = mode;
-	}
+	};
 
 	/**
 	 * 画面要素を設定する拡張ポイントです。
 	 */
 	protected void setElements() {
-	};
+	}
 
 	/**
 	 * 画面要素に対するEventを設定する拡張ポイントです。
@@ -190,4 +199,23 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	 * ロード開始時の処理を行います。
 	 */
 	protected abstract void showLoadingView();
+
+	/**
+	 * 親ActivityからActivityを呼び出します。
+	 * 
+	 * @param intent
+	 */
+	protected void startActivity(Intent intent) {
+		getActivity().startActivity(intent);
+	}
+
+	/**
+	 * 親ActivityからActivityを呼び出します。
+	 * 
+	 * @param intent
+	 * @param requestCode
+	 */
+	protected void startActivityForResult(Intent intent, int requestCode) {
+		getActivity().startActivityForResult(intent, requestCode);
+	}
 }

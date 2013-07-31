@@ -1,24 +1,22 @@
 package jp.arannd.viewgroup.example;
 
 import jp.arannd.viewgroup.wrapper.IViewGroup;
-
-import com.example.stackview.R;
-
-import android.app.Activity;
+import jp.arannd.viewgroup.wrapper.IViewGroupManageActivityParam;
+import jp.arannd.viewgroup.wrapper.ViewGroupManageActivityBase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-public class MainActivity extends Activity {
+import com.example.stackview.R;
+
+public class MainActivity extends ViewGroupManageActivityBase {
 
 	private class TabMode {
 		public static final int FIRST = 0;
 		public static final int SECOND = 1;
 	}
-
-	private IViewGroup contentViewGroup;
 
 	private ViewGroup viewGroup;
 
@@ -34,24 +32,6 @@ public class MainActivity extends Activity {
 	}
 
 	@Override
-	public void onBackPressed() {
-		if (!contentViewGroup.onBackPressed()) {
-			super.onBackPressed();
-		}
-
-	}
-
-	public void onChangeView(int mode) {
-		viewGroup.removeAllViews();
-		if (contentViewGroup != null) {
-			contentViewGroup.onDestroy();
-		}
-		contentViewGroup = null;
-		contentViewGroup = getContentViewGroup(mode);
-		viewGroup.addView(contentViewGroup.getView());
-	}
-
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -62,7 +42,7 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						onChangeView(TabMode.FIRST);
+						onChangeView(getContentViewGroup(TabMode.FIRST));
 					}
 
 				});
@@ -71,11 +51,21 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						onChangeView(TabMode.SECOND);
+						onChangeView(getContentViewGroup(TabMode.SECOND));
 					}
 
 				});
-		onChangeView(TabMode.FIRST);
+		onChangeView(getContentViewGroup(TabMode.FIRST));
+	}
+
+	@Override
+	protected IViewGroupManageActivityParam getViewGroupManageActivityParams() {
+		return new IViewGroupManageActivityParam() {
+			@Override
+			public ViewGroup getCntentViewGroup() {
+				return viewGroup;
+			}
+		};
 	}
 
 }

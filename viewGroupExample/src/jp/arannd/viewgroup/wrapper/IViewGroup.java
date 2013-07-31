@@ -1,5 +1,6 @@
 package jp.arannd.viewgroup.wrapper;
 
+import android.content.Intent;
 import android.view.View;
 
 public interface IViewGroup {
@@ -10,4 +11,6 @@ public interface IViewGroup {
 	boolean onBackPressed();
 
 	void onDestroy();
+
+	void onActivityResult(int requestCode, int resultCode, Intent data);
 }
