@@ -1,0 +1,119 @@
+package jp.arannd.viewgroup.example;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jp.arannd.viewgroup.wrapper.ViewGroupBase;
+
+import com.example.stackview.R;
+
+import android.os.AsyncTask;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+public class Tab1ViewGroup extends ViewGroupBase<MainActivity> {
+
+	public class ViewMode {
+		public final static int SECCOND = 1;
+		public final static int TOP = 0;
+	}
+
+	private ViewGroup firstGroup;
+
+	public List<Hoge> hogeList = new ArrayList<Hoge>();
+
+	private ViewGroup loadGroup;
+
+	private ViewGroup seccondGroup;
+
+	public Tab1ViewGroup(MainActivity activity) {
+		super(activity);
+		new AsyncTask<String, Void, List<Hoge>>() {
+
+			@Override
+			protected List<Hoge> doInBackground(String... params) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				List<Hoge> list = new ArrayList<Hoge>();
+				for (int i = 0; i < 50000; i++) {
+					Hoge hoge = new Hoge();
+					hoge.setId(i);
+					hoge.setName("name " + i);
+					list.add(hoge);
+				}
+				return list;
+			}
+
+			@Override
+			protected void onPostExecute(List<Hoge> result) {
+				super.onPostExecute(result);
+				hogeList.addAll(result);
+				result = null;
+				hiddenLoadingView();
+			}
+		}.execute("");
+	}
+
+	@Override
+	protected void doChangeView() {
+		hiddenLoadingView();
+	}
+
+	@Override
+	protected int getContextLayoutId() {
+		return R.layout.activity_tab1;
+	}
+
+	@Override
+	public void hiddenLoadingView() {
+		int firstVisibility = getVisibilityModel(ViewMode.TOP);
+		int seccondVisibility = getVisibilityModel(ViewMode.SECCOND);
+		int loadVisibility = View.GONE;
+		firstGroup.setVisibility(firstVisibility);
+		seccondGroup.setVisibility(seccondVisibility);
+		loadGroup.setVisibility(loadVisibility);
+	}
+
+	@Override
+	public boolean onBackPressed() {
+		boolean result = false;
+		if (getCurrentMode() == ViewMode.TOP) {
+		}
+		if (getCurrentMode() == ViewMode.SECCOND) {
+			doChangeViewAction(ViewMode.TOP);
+			result = true;
+		}
+		return result;
+	}
+
+	@Override
+	protected void setElements() {
+		super.setElements();
+		firstGroup = (ViewGroup) findViewById(R.id.firstLayout);
+		seccondGroup = (ViewGroup) findViewById(R.id.seccondLayout);
+		loadGroup = (ViewGroup) findViewById(R.id.loadLayout);
+	}
+
+	@Override
+	protected void setEvents() {
+		super.setEvents();
+		((Button) findViewById(R.id.hogeButton))
+				.setOnClickListener(new NavigateOnClickListener(
+						ViewMode.SECCOND));
+	}
+
+	@Override
+	public void showLoadingView() {
+		int firstVisibility = View.GONE;
+		int seccondVisibility = View.GONE;
+		int loadVisibility = View.VISIBLE;
+		firstGroup.setVisibility(firstVisibility);
+		seccondGroup.setVisibility(seccondVisibility);
+		loadGroup.setVisibility(loadVisibility);
+	}
+}
