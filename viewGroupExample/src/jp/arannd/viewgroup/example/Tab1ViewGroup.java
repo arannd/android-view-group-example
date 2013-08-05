@@ -1,22 +1,27 @@
 package jp.arannd.viewgroup.example;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import jp.arannd.viewgroup.wrapper.ViewGroupBase;
+import jp.arannd.viewgroup.wrapper.ViewSwitchableBase;
+import android.os.AsyncTask;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 
 import com.example.stackview.R;
 
-import android.os.AsyncTask;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
+public class Tab1ViewGroup extends ViewSwitchableBase<MainActivity> {
 
-public class Tab1ViewGroup extends ViewGroupBase<MainActivity> {
-
-	public class ViewMode {
+	private class ViewMode {
 		public final static int SECCOND = 1;
 		public final static int TOP = 0;
+	}
+
+	private class RequestCode {
+		public final static int TAB2 = 0;
 	}
 
 	private ViewGroup firstGroup;
@@ -69,7 +74,6 @@ public class Tab1ViewGroup extends ViewGroupBase<MainActivity> {
 		return R.layout.activity_tab1;
 	}
 
-	@Override
 	public void hiddenLoadingView() {
 		int firstVisibility = getVisibilityModel(ViewMode.TOP);
 		int seccondVisibility = getVisibilityModel(ViewMode.SECCOND);
@@ -102,12 +106,17 @@ public class Tab1ViewGroup extends ViewGroupBase<MainActivity> {
 	@Override
 	protected void setEvents() {
 		super.setEvents();
-		((Button) findViewById(R.id.hogeButton))
-				.setOnClickListener(new NavigateOnClickListener(
-						ViewMode.SECCOND));
+		findViewById(R.id.hogeButton).setOnClickListener(
+				new NavigateOnClickListener(ViewMode.SECCOND));
+		findViewById(R.id.tab2Button).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onChangeViewStack(new Tab2ViewGroup(getActivity()),
+						RequestCode.TAB2);
+			}
+		});
 	}
 
-	@Override
 	public void showLoadingView() {
 		int firstVisibility = View.GONE;
 		int seccondVisibility = View.GONE;

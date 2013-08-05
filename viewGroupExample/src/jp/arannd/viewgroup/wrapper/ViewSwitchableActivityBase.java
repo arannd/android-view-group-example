@@ -1,17 +1,57 @@
 package jp.arannd.viewgroup.wrapper;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.view.ViewGroup;
 
-public abstract class ViewGroupManageActivityBase extends Activity {
-	private IViewGroup contentViewGroup;
+public abstract class ViewSwitchableActivityBase extends Activity {
+	private class ViewStackData {
+		private IViewSwitchable viewSwitchable;
+		public int requestCode;
 
-	/**
-	 * 現在表示中のViewGroupを取得します。
-	 * 
-	 * @return　現在表示中のViewGroupを返します。
-	 */
-	public IViewGroup getContentViewGroup() {
+		private ViewStackData() {
+
+		}
+
+		public int getRequestCode() {
+			return requestCode;
+		}
+
+		public IViewSwitchable getViewSwitchable() {
+			return viewSwitchable;
+		}
+
+		public void setRequestCode(int requestCode) {
+			this.requestCode = requestCode;
+		}
+
+		public void setViewSwitchable(IViewSwitchable viewSwitchable) {
+			this.viewSwitchable = viewSwitchable;
+		}
+	}
+
+	private ViewGroup contentViewGroup = null;
+
+	private IViewSwitchableActivityParam viewGroupManageActivityParam = null;
+
+	private IViewSwitchable viewSwitchable;
+
+	ArrayList<ViewStackData> viewStackDataList = new ArrayList<ViewStackData>();
+
+	private IViewSwitchableActivityParam getActivityParam() {
+		if (viewGroupManageActivityParam == null) {
+			viewGroupManageActivityParam = getViewGroupManageActivityParam();
+		}
+		return viewGroupManageActivityParam;
+	}
+
+	protected ViewGroup getContentViewGroup() {
+		if (contentViewGroup == null) {
+			contentViewGroup = (ViewGroup) findViewById(getActivityParam()
+					.getCntentViewGroupLayoutId());
+		}
 		return contentViewGroup;
 	}
 
@@ -20,7 +60,16 @@ public abstract class ViewGroupManageActivityBase extends Activity {
 	 * 
 	 * @return
 	 */
-	protected abstract IViewGroupManageActivityParam getViewGroupManageActivityParams();
+	protected abstract IViewSwitchableActivityParam getViewGroupManageActivityParam();
+
+	/**
+	 * 現在表示中のViewGroupを取得します。
+	 * 
+	 * @return　現在表示中のViewGroupを返します。
+	 */
+	public IViewSwitchable getViewSwitchable() {
+		return viewSwitchable;
+	}
 
 	/**
 	 * Activityから結果をViewGroupに反映させます。
@@ -28,7 +77,7 @@ public abstract class ViewGroupManageActivityBase extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		getContentViewGroup().onActivityResult(requestCode, resultCode, data);
+		getViewSwitchable().onActivityResult(requestCode, resultCode, data);
 	}
 
 	/**
@@ -36,26 +85,49 @@ public abstract class ViewGroupManageActivityBase extends Activity {
 	 */
 	@Override
 	public void onBackPressed() {
-		if (!getContentViewGroup().onBackPressed()) {
-			super.onBackPressed();
+		if (!getViewSwitchable().onBackPressed()) {
+			if (viewStackDataList.size() > 0) {
+				int index = viewStackDataList.size() - 1;
+				ViewStackData stackData = viewStackDataList.get(index);
+				stackData.getViewSwitchable().setViewSwitchableContent(this);
+				onChangeView(stackData.getViewSwitchable());
+				stackData.getViewSwitchable().onBackForViewStack(
+						stackData.getRequestCode());
+				viewStackDataList.remove(index);
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 
 	/**
 	 * 現在のContentを切り替えます。
 	 * 
-	 * @param viewGroup
+	 * @param viewSwitchable
 	 */
-	public void onChangeView(IViewGroup viewGroup) {
-		getViewGroupManageActivityParams().getCntentViewGroup()
-				.removeAllViews();
-		if (getContentViewGroup() != null) {
-			getContentViewGroup().onDestroy();
+	public void onChangeView(IViewSwitchable viewSwitchable) {
+		getContentViewGroup().removeAllViews();
+		if (getViewSwitchable() != null) {
+			getViewSwitchable().onDestroy();
 		}
-		setContentViewGroup(null);
-		setContentViewGroup(viewGroup);
-		getViewGroupManageActivityParams().getCntentViewGroup().addView(
-				getContentViewGroup().getView());
+		setViewSwitchable(null);
+		setViewSwitchable(viewSwitchable);
+		getContentViewGroup().addView(getViewSwitchable().getView());
+	}
+
+	/**
+	 * ViewSwitchをStackしながら画面遷移を行います。
+	 * 
+	 * @param viewSwitchable
+	 */
+	public void onChangeViewStack(IViewSwitchable viewSwitchable,
+			int requestCode) {
+		getViewSwitchable().clearViewSwitchableContent();
+		ViewStackData viewStackData = new ViewStackData();
+		viewStackData.setViewSwitchable(getViewSwitchable());
+		viewStackData.setRequestCode(requestCode);
+		viewStackDataList.add(viewStackData);
+		onChangeView(viewSwitchable);
 	}
 
 	/**
@@ -63,8 +135,8 @@ public abstract class ViewGroupManageActivityBase extends Activity {
 	 * 
 	 * @return　現在表示中のViewGroupを返します。
 	 */
-	protected void setContentViewGroup(IViewGroup contentViewGroup) {
-		this.contentViewGroup = contentViewGroup;
+	protected void setViewSwitchable(IViewSwitchable viewSwitchable) {
+		this.viewSwitchable = viewSwitchable;
 	}
 
 }

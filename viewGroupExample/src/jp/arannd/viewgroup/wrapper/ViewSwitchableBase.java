@@ -1,13 +1,12 @@
 package jp.arannd.viewgroup.wrapper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public abstract class ViewGroupBase<TActivity extends Activity> implements
-		IViewGroup {
+public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivityBase>
+		implements IViewSwitchable {
 	protected class NavigateOnClickListener implements OnClickListener {
 		private final int mode;
 
@@ -22,19 +21,27 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 
 	}
 
-	private final TActivity activity;
-	private final Context context;
+	private TActivity activity;
+	private Context context;
 	private int currentMode = 0;
 	private int prevCurrentMode = 0;
 
 	private View view;
 
-	public ViewGroupBase(TActivity activity) {
-		this.activity = activity;
-		this.context = activity;
+	public ViewSwitchableBase(TActivity activity) {
+		setViewSwitchableContent(activity);
 		initialize();
 		setElements();
 		setEvents();
+	}
+
+	/**
+	 * 依存するActivity,Contextをクリアします。
+	 */
+	@Override
+	public void clearViewSwitchableContent() {
+		activity = null;
+		context = null;
 	}
 
 	/**
@@ -125,11 +132,6 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	}
 
 	/**
-	 * Load完了時の処理を行います。
-	 */
-	protected abstract void hiddenLoadingView();
-
-	/**
 	 * 初期化
 	 */
 	protected void initialize() {
@@ -146,11 +148,28 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	}
 
 	/**
+	 * Stack状態から復帰した際の拡張ポイントです。
+	 */
+	@Override
+	public void onBackForViewStack(int requestCode) {
+	}
+
+	/**
 	 * 戻るの処理
 	 * 
 	 * @return 現在のViewに戻る要素があれば True を返し 戻る要素がなければ False を返します。
 	 */
 	public abstract boolean onBackPressed();
+
+	/**
+	 * 親ActivityからonChangeViewStackを呼び出します。
+	 * 
+	 * @param viewSwitchable
+	 */
+	protected void onChangeViewStack(IViewSwitchable viewSwitchable,
+			int requestCode) {
+		getActivity().onChangeViewStack(viewSwitchable, requestCode);
+	}
 
 	/**
 	 * タブが切り替わった時点で現在のインスタンスを破棄する
@@ -167,7 +186,7 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	 */
 	protected void setCurrentMode(int mode) {
 		this.currentMode = mode;
-	};
+	}
 
 	/**
 	 * 画面要素を設定する拡張ポイントです。
@@ -196,9 +215,14 @@ public abstract class ViewGroupBase<TActivity extends Activity> implements
 	}
 
 	/**
-	 * ロード開始時の処理を行います。
+	 * 依存するActivity,Contextを設定します。 強制的にTActivityにCastします。
 	 */
-	protected abstract void showLoadingView();
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setViewSwitchableContent(ViewSwitchableActivityBase activity) {
+		this.activity = (TActivity) activity;
+		context = activity;
+	}
 
 	/**
 	 * 親ActivityからActivityを呼び出します。

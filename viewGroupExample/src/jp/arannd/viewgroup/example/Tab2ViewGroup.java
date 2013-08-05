@@ -3,7 +3,7 @@ package jp.arannd.viewgroup.example;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.arannd.viewgroup.wrapper.ViewGroupBase;
+import jp.arannd.viewgroup.wrapper.ViewSwitchableBase;
 
 import com.example.stackview.R;
 
@@ -11,7 +11,7 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class Tab2ViewGroup extends ViewGroupBase<MainActivity> {
+public class Tab2ViewGroup extends ViewSwitchableBase<MainActivity> {
 
 	public class ViewMode {
 		public final static int TOP = 0;
@@ -65,15 +65,9 @@ public class Tab2ViewGroup extends ViewGroupBase<MainActivity> {
 		return R.layout.activity_tab2;
 	}
 
-	@Override
 	public void hiddenLoadingView() {
-		int firstVisibility = View.GONE;
+		int firstVisibility = getVisibilityModel(ViewMode.TOP);
 		int loadVisibility = View.GONE;
-
-		int mode = getCurrentMode();
-		if (mode == 0) {
-			firstVisibility = View.VISIBLE;
-		}
 		firstGroup.setVisibility(firstVisibility);
 		loadGroup.setVisibility(loadVisibility);
 	}
@@ -93,9 +87,8 @@ public class Tab2ViewGroup extends ViewGroupBase<MainActivity> {
 		loadGroup = (ViewGroup) findViewById(R.id.loadLayout);
 	}
 
-	@Override
 	public void showLoadingView() {
-		int firstVisibility = getVisibilityModel(ViewMode.TOP);
+		int firstVisibility = View.GONE;
 		int loadVisibility = View.VISIBLE;
 		firstGroup.setVisibility(firstVisibility);
 		loadGroup.setVisibility(loadVisibility);
