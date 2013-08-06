@@ -4,9 +4,35 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
+/**
+ * Viewの切り替えを管理するActivityの基底クラスです。
+ * 
+ * @author arannd
+ * 
+ */
 public abstract class ViewSwitchableActivityBase extends Activity {
+	protected class TabChangeOnClickListener implements OnClickListener {
+
+		private final int mode;
+
+		public TabChangeOnClickListener(int mode) {
+			this.mode = mode;
+		}
+
+		protected int getModel() {
+			return mode;
+		}
+
+		@Override
+		public void onClick(View v) {
+			onChangeView(createContentViewSwitchable(getModel()));
+		}
+	}
+
 	private class ViewStackData {
 		private IViewSwitchable viewSwitchable;
 		public int requestCode;
@@ -38,7 +64,15 @@ public abstract class ViewSwitchableActivityBase extends Activity {
 
 	private IViewSwitchable viewSwitchable;
 
-	ArrayList<ViewStackData> viewStackDataList = new ArrayList<ViewStackData>();
+	/**
+	 * ViewSwichableのインスタンスを作成します。
+	 * 
+	 * @param mode
+	 * @return
+	 */
+	protected abstract IViewSwitchable createContentViewSwitchable(int mode);
+
+	private final ArrayList<ViewStackData> viewStackDataList = new ArrayList<ViewStackData>();
 
 	private IViewSwitchableActivityParam getActivityParam() {
 		if (viewGroupManageActivityParam == null) {
@@ -63,9 +97,9 @@ public abstract class ViewSwitchableActivityBase extends Activity {
 	protected abstract IViewSwitchableActivityParam getViewGroupManageActivityParam();
 
 	/**
-	 * 現在表示中のViewGroupを取得します。
+	 * 現在表示中のViewを取得します。
 	 * 
-	 * @return　現在表示中のViewGroupを返します。
+	 * @return　現在表示中のViewを返します。
 	 */
 	public IViewSwitchable getViewSwitchable() {
 		return viewSwitchable;
@@ -95,13 +129,17 @@ public abstract class ViewSwitchableActivityBase extends Activity {
 						stackData.getRequestCode());
 				viewStackDataList.remove(index);
 			} else {
-				super.onBackPressed();
+				doBackPressed();
 			}
 		}
 	}
 
+	protected void doBackPressed() {
+		super.onBackPressed();
+	}
+
 	/**
-	 * 現在のContentを切り替えます。
+	 * Viewを切り替えます。
 	 * 
 	 * @param viewSwitchable
 	 */
@@ -130,13 +168,28 @@ public abstract class ViewSwitchableActivityBase extends Activity {
 		onChangeView(viewSwitchable);
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		getViewSwitchable().onResume();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		getViewSwitchable().onStart();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		getViewSwitchable().onStop();
+	}
+
 	/**
-	 * 現在表示中のViewGroupを設定します。
-	 * 
-	 * @return　現在表示中のViewGroupを返します。
+	 * Viewを設定します。
 	 */
 	protected void setViewSwitchable(IViewSwitchable viewSwitchable) {
 		this.viewSwitchable = viewSwitchable;
 	}
-
 }

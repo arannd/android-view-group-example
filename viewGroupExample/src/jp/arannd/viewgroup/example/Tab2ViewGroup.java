@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.arannd.viewgroup.wrapper.ViewSwitchableBase;
-
-import com.example.stackview.R;
-
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.stackview.R;
 
 public class Tab2ViewGroup extends ViewSwitchableBase<MainActivity> {
 

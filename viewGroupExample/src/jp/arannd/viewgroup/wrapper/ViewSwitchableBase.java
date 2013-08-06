@@ -2,9 +2,18 @@ package jp.arannd.viewgroup.wrapper;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+/**
+ * Viewの切り替えを行う事が出来る基底クラスです。
+ * 
+ * @author arannd
+ * 
+ * @param <TActivity>
+ *            親となるActivityを指定して下さい。
+ */
 public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivityBase>
 		implements IViewSwitchable {
 	protected class NavigateOnClickListener implements OnClickListener {
@@ -56,9 +65,8 @@ public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivit
 	 *            変更先のModeを設定して下さい。
 	 */
 	protected void doChangeViewAction(int mode) {
-		currentMode = mode;
+		setCurrentMode(mode);
 		doChangeView();
-		prevCurrentMode = mode;
 	}
 
 	/**
@@ -106,8 +114,21 @@ public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivit
 		return currentMode;
 	}
 
+	/**
+	 * 現在の表示モードの前を取得します。
+	 * 
+	 * @return
+	 */
 	public int getPrevCurrentMode() {
 		return prevCurrentMode;
+	}
+
+	protected Resources getResources() {
+		return getContext().getResources();
+	}
+
+	protected String getString(int resId) {
+		return getContext().getString(resId);
 	}
 
 	/**
@@ -171,6 +192,18 @@ public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivit
 		getActivity().onChangeViewStack(viewSwitchable, requestCode);
 	}
 
+	public void onResume() {
+
+	}
+
+	public void onStart() {
+
+	}
+
+	public void onStop() {
+
+	}
+
 	/**
 	 * タブが切り替わった時点で現在のインスタンスを破棄する
 	 */
@@ -180,11 +213,12 @@ public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivit
 	}
 
 	/**
-	 * 現在の表示モードを設定します。
+	 * 現在の表示モードを設定します。 設定前の状態を保持します。
 	 * 
 	 * @param mode
 	 */
 	protected void setCurrentMode(int mode) {
+		prevCurrentMode = this.currentMode;
 		this.currentMode = mode;
 	}
 
@@ -198,10 +232,6 @@ public abstract class ViewSwitchableBase<TActivity extends ViewSwitchableActivit
 	 * 画面要素に対するEventを設定する拡張ポイントです。
 	 */
 	protected void setEvents() {
-	}
-
-	public void setPrevCurrentMode(int prevCurrentMode) {
-		this.prevCurrentMode = prevCurrentMode;
 	}
 
 	/**
